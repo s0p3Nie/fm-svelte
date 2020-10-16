@@ -33,7 +33,7 @@
             navigateSuccess();
         }
     }
-    function navigateSuccess() {
+    export function navigateSuccess() {
         currentPosition = fsWalker.getCurrentPosition();
         backContainerEmpty = fsWalker.getContainer('undo').isEmpty();
         forwContainerEmpty = fsWalker.getContainer('redo').isEmpty();

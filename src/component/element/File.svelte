@@ -1,19 +1,46 @@
 <script>
+    
+    // =================================================
     import { createEventDispatcher } from 'svelte';
-    const dispatch = createEventDispatcher();
+    const shell = require('electron').shell;
 
-	function stepInto(fileName) {
+    const dispatch = createEventDispatcher();
+    function stepInto(fileName) {
+        if (fileName.endsWith('.lnk')) {
+            let fullName = path.normalize(workingDirectory + path.sep + fileName);
+            fileName = shell.readShortcutLink(fullName).target;
+            dispatch('jumpInto', {
+                dir: fileName,
+            });
+        }
 		dispatch('stepInto', {
 			dir: fileName,
 		});
-	}
+    }
+    // =================================================
 
+    import { fs } from '~/fs';
+    import { path } from '~/path';
     export let fileName;
+    export let workingDirectory;
+
+    let size;
+    /* not working %( */
+    fs.stat(path.normalize(workingDirectory + path.sep + fileName), (err, stat) => {
+        if (err) {
+            console.log(err);
+        }
+
+        size = stat.size;
+    });
+    
 </script>
 
-<div class="row card" on:click={stepInto(fileName)}>
-    {fileName}
-</div>
+<tr on:click={stepInto(fileName)}>
+    <td>{fileName}</td>
+    <td>smth</td>
+    <td>123123</td>
+</tr>
 
 <style>
     .row {

@@ -5,29 +5,46 @@
 	import { Walker as FSWalker } from './service/fs/walker';
 	import { FileSystemService as FSService } from './service/fs/fsmain';
 
-	let walker = new FSWalker();
+	const walker = new FSWalker();
 	const fsService = new FSService(walker); 
+	let navigationBlock;
 	$: fileList = [];
+	$: currentPosition = walker.getCurrentPosition();
 	refreshFileList();
 
+	function jumpInto(event) {
+		if (walker.jumpTo(event.detail.dir)) {
+			navigationBlock.navigateSuccess();
+		}
+	}
 	function stepInto(event) {
-		walker.stepInto(event.detail.dir);
-		refreshFileList();
+		if (walker.stepInto(event.detail.dir)) {
+			navigationBlock.navigateSuccess();
+		}
 	}
 
 	function refreshFileList() {
-		fsService.getPathContents(walker.getCurrentPosition()).then(res => { fileList = res });
+		fsService.getPathContents(walker.getCurrentPosition()).then(res => { 
+			fileList = res; 
+			currentPosition = walker.getCurrentPosition() 
+		});
 	}
 </script>  
 
 <main> 
 	<WindowButtons />
 	
-	<NavigationBlock fsWalker={walker} on:navigate-success={refreshFileList} />
+	<NavigationBlock bind:this={navigationBlock} fsWalker={walker} on:navigate-success={refreshFileList} />
 	
-	{#each fileList as file }
-		<File on:stepInto={stepInto} fileName={file}/>
-	{/each }
+	<table class='g--8 card'>
+		<tr class='table-header'>
+			<td>Имя</td>
+			<td>Вес</td>
+		</tr>
+		{#each fileList as file }
+			<File on:stepInto={stepInto} on:jumpInto={jumpInto} fileName={file} workingDirectory={currentPosition}/>
+		{/each }
+	</table>
 </main>
 
 <style global type="text/scss">

@@ -1,8 +1,8 @@
 ## TODO 
 
 Next version on:
-1. Кнопки "Back", "Forvard", "GoTo", "Up";
-2. Ссылки (Right Tab)
+1. CHECK. Кнопки "Back", "Forvard", "GoTo", "Up"; CHECK
+2. CHECK. Ссылки
 3. Переход между дисками Windows
 4. Передача файлов на открытие в ОС. 
 

@@ -26,8 +26,10 @@ export class Walker {
         if (currentPathBefore !== this.currentPath) {
             this.undoContainer.add(currentPathBefore);
             this.redoContainer.clear();
+            return true;
         }
-        console.log(this.currentPath);
+
+        return false;
     }
 
     stepBackwards() {
