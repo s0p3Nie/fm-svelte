@@ -1,8 +1,13 @@
 import { fs } from '~/fs';
 import { path } from '~/path';
 import { BaseContainer } from '~/types/containers';
+import { DrivesHelper } from '~/helpers/sys-folder-helper';
   
 export class Walker { 
+    undoContainer;
+    redoContainer;
+
+    rootPath = '\\';
 
     constructor(startPath) {
         // В будущем надо будет соблюдать предел контенера, ЖС начинает жестоко тупить с большими массивами
@@ -15,12 +20,30 @@ export class Walker {
         }
         this.undoContainer = new BaseContainer();
         this.redoContainer = new BaseContainer();
+        this.drivesHelper = new DrivesHelper();
+    }
+
+    normalizePath(toNormalize) {
+        const normalized = path.normalize(toNormalize);
+
+        return normalized.startsWith(this.rootPath) && 1 < normalized.length
+            ? normalized.substring(this.rootPath.length)
+            : normalized;
+    }
+
+    checkDirectory(directory) {
+        return this.rootPath === directory 
+            || (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory());
     }
 
     stepInto(directory) {
-        const currentPathBefore = path.normalize(this.currentPath);
-        const gotoDirectory = path.normalize(this.currentPath + path.sep + directory);
-        if (fs.existsSync(gotoDirectory) && fs.lstatSync(gotoDirectory).isDirectory()) {
+        const currentPathBefore = this.normalizePath(this.currentPath);
+        const gotoDirectory = this.normalizePath(
+            this.currentPath 
+            + (this.rootPath === currentPathBefore ? '' : path.sep) 
+            + directory
+        );
+        if (this.checkDirectory(gotoDirectory)) {
             this.currentPath = gotoDirectory;
         }
         if (currentPathBefore !== this.currentPath) {
@@ -33,9 +56,12 @@ export class Walker {
     }
 
     stepBackwards() {
-        const currentPathBefore = path.normalize(this.currentPath);
-        const gotoDirectory = path.normalize(this.currentPath + path.sep + '..');
-        if (fs.existsSync(gotoDirectory) && fs.lstatSync(gotoDirectory).isDirectory()) {
+        const currentPathBefore = this.normalizePath(this.currentPath);
+        const gotoDirectory = this.drivesHelper.getDriveList().includes(currentPathBefore)
+            ? this.rootPath 
+            : this.normalizePath(this.currentPath + path.sep + '..');
+
+        if (this.checkDirectory(gotoDirectory)) {
             this.currentPath = gotoDirectory;
         }
         if (currentPathBefore !== this.currentPath) {
@@ -45,9 +71,9 @@ export class Walker {
     }
 
     jumpTo(directory) {
-        const currentPathBefore = path.normalize(this.currentPath);
-        const gotoDirectory = path.normalize(directory);
-        if (fs.existsSync(gotoDirectory) && fs.lstatSync(gotoDirectory).isDirectory()) {
+        const currentPathBefore = this.normalizePath(this.currentPath);
+        const gotoDirectory = this.normalizePath(directory);
+        if (this.checkDirectory(gotoDirectory)) {
             this.currentPath = gotoDirectory;
         }
         if (currentPathBefore !== this.currentPath) {
@@ -58,9 +84,9 @@ export class Walker {
     }
 
     stepUndo() {
-        const currentPathBefore = path.normalize(this.currentPath);
+        const currentPathBefore = this.normalizePath(this.currentPath);
         if (!this.undoContainer.isEmpty()) {
-            const undoPath = path.normalize(this.undoContainer.get());
+            const undoPath = this.normalizePath(this.undoContainer.get());
             if (currentPathBefore !== undoPath) {
                 this.redoContainer.add(currentPathBefore);
                 this.currentPath = undoPath;
@@ -69,9 +95,9 @@ export class Walker {
     }
 
     stepRedo() {
-        const currentPathBefore = path.normalize(this.currentPath);
+        const currentPathBefore = this.normalizePath(this.currentPath);
         if (!this.redoContainer.isEmpty()) {
-            const redoPath = path.normalize(this.redoContainer.get());
+            const redoPath = this.normalizePath(this.redoContainer.get());
             if (currentPathBefore !== redoPath) {
                 this.undoContainer.add(currentPathBefore);
                 this.currentPath = redoPath;
@@ -80,7 +106,7 @@ export class Walker {
     }
 
     getCurrentPosition() {
-        return path.normalize(this.currentPath);
+        return this.normalizePath(this.currentPath);
     }
 
     getContainer(type) {

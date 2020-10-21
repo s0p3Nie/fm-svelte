@@ -1,10 +1,7 @@
 ## TODO 
 
 Next version on:
-1. CHECK. Кнопки "Back", "Forvard", "GoTo", "Up"; CHECK
-2. CHECK. Ссылки
-3. Переход между дисками Windows
-4. Передача файлов на открытие в ОС. 
+1. Реальная Информация о файлах в таблице
 
 ## Research & Continious tasks:
 

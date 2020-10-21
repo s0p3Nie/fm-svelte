@@ -3,24 +3,33 @@
     // =================================================
     import { createEventDispatcher } from 'svelte';
     const shell = require('electron').shell;
+    const fs = require('fs');
+    const path = require('path');
 
     const dispatch = createEventDispatcher();
     function stepInto(fileName) {
+        let fullName = path.normalize(workingDirectory + path.sep + fileName);
         if (fileName.endsWith('.lnk')) {
-            let fullName = path.normalize(workingDirectory + path.sep + fileName);
             fileName = shell.readShortcutLink(fullName).target;
             dispatch('jumpInto', {
                 dir: fileName,
             });
+
+            return;
         }
-		dispatch('stepInto', {
-			dir: fileName,
-		});
+        if (fullName.startsWith('\\') || fs.lstatSync(fullName).isDirectory()) {
+            dispatch('stepInto', {
+			    dir: fileName,
+            });
+            
+            return;
+        }
+
+        shell.openPath(fullName).then((result) => { console.log(result)});
+        return;
     }
     // =================================================
 
-    import { fs } from '~/fs';
-    import { path } from '~/path';
     export let fileName;
     export let workingDirectory;
 
@@ -43,7 +52,5 @@
 </tr>
 
 <style>
-    .row {
-        width: 100%;
-    }
+
 </style>

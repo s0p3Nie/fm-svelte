@@ -1,5 +1,8 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const drivelist = require('drivelist');
+const jsonHelper = require('./helpers/json');
 
 require('electron-reload')(__dirname, {
   electron: path.join(__dirname, '../node_modules', '.bin', 'electron'),
@@ -10,6 +13,11 @@ require('electron-reload')(__dirname, {
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
+
+// loading system volumes info
+drivelist.list().then(result => {
+    jsonHelper.write('./drivelist.json', result);
+})
 
 const createWindow = () => {
   // Create the browser window.
