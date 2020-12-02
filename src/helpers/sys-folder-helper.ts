@@ -1,4 +1,4 @@
-import { fs } from '~/fs';
+import { fs } from '../fs';
 
 export class DrivesHelper {
     drivesInfo = [];
@@ -28,6 +28,6 @@ export class DrivesHelper {
     }
 
     isDrive(drive) {
-        
+
     }
 }

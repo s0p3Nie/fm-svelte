@@ -1,19 +1,22 @@
-import { fs } from '~/fs';
-import { path } from '~/path';
+import { fs } from '../../fs';
+import { path } from '../../path';
+import type {Walker} from "./walker";
 
 /**
  * Main entry point for mostly all fileSystem operations
  */
 export class FileSystemService {
+    private walker: Walker;
+
     constructor(walker) {
         this.walker = walker;
     }
 
     getFileMetas(file) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             fs.stat(this.walker.getCurrentPosition() + path.sep + file, (err, stats) => {
                 if (err) {
-                    resolve();
+                    reject(err);
                 }
                 resolve(stats);
             });
@@ -27,10 +30,10 @@ export class FileSystemService {
             })
         }
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             fs.readdir(this.walker.getCurrentPosition(), (err, files) => {
                 if (err) {
-                    resolve();
+                    reject(err);
                 }
                 resolve(files);
             });

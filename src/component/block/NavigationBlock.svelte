@@ -1,13 +1,13 @@
 <script>
-    import BackButton from '~/component/element/button/BackButton.svelte';
-    import ForwardButton from '~/component/element/button/ForwardButton.svelte';
-    import BackwardsButton from '~/component/element/button/BackwardsButton.svelte';
-    import GoToInput from '~/component/element/input/GoToInput.svelte';
+    import BackButton from '../../component/element/button/BackButton.svelte';
+    import ForwardButton from '../../component/element/button/ForwardButton.svelte';
+    import BackwardsButton from '../../component/element/button/BackwardsButton.svelte';
+    import GoToInput from '../../component/element/input/GoToInput.svelte';
     import { createEventDispatcher } from 'svelte';
 
     export let fsWalker;
 
-    const dispatch = createEventDispatcher();    
+    const dispatch = createEventDispatcher();
 
     $: currentPosition = fsWalker.getCurrentPosition();
     $: backContainerEmpty = fsWalker.getContainer('undo').isEmpty();
@@ -55,7 +55,7 @@
             <BackwardsButton/>
         </span>
         <span>
-            <GoToInput goToDirectory={currentPosition} keyup={jumpTo}/>    
+            <GoToInput goToDirectory={currentPosition} keyup={jumpTo}/>
         </span>
     </span>
 </div>

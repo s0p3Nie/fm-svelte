@@ -1,4 +1,7 @@
 export class BaseContainer {
+    private container;
+    private limit;
+
     constructor(limit) {
         this.container = [];
         this.limit = limit;
@@ -15,7 +18,7 @@ export class BaseContainer {
     get() {
         return this.container.pop();
     }
-    
+
     isEmpty() {
         return 0 === this.container.length;
     }

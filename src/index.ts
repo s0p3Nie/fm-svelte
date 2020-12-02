@@ -1,8 +1,9 @@
+// @ts-ignore
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const fs = require('fs');
 const drivelist = require('drivelist');
-const jsonHelper = require('./helpers/json');
+// @ts-ignore
+const fs = require('fs');
 
 require('electron-reload')(__dirname, {
   electron: path.join(__dirname, '../node_modules', '.bin', 'electron'),
@@ -16,7 +17,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 // loading system volumes info
 drivelist.list().then(result => {
-    jsonHelper.write('./drivelist.json', result);
+  fs.writeFile('./drivelist.json', JSON.stringify(result), (err) => { if (err) throw err });
 })
 
 const createWindow = () => {
@@ -26,7 +27,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: { nodeIntegration: true }
   });
-  
+
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
 

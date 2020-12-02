@@ -1,25 +1,28 @@
-import { fs } from '~/fs';
-import { path } from '~/path';
-import { BaseContainer } from '~/types/containers';
-import { DrivesHelper } from '~/helpers/sys-folder-helper';
-  
-export class Walker { 
-    undoContainer;
-    redoContainer;
+//import {fs} from '../../fs';
+import { fs }  from '../../fs';
+import { path } from '../../path';
+import { BaseContainer } from '../../types';
+import { DrivesHelper } from '../../helpers/sys-folder-helper.js';
+
+export class Walker {
+    undoContainer: BaseContainer;
+    redoContainer: BaseContainer;
+    currentPath;
+    drivesHelper;
 
     rootPath = '\\';
 
     constructor(startPath) {
         // В будущем надо будет соблюдать предел контенера, ЖС начинает жестоко тупить с большими массивами
         const stackLimit = 5000;
-        
+
         if (startPath && fs.existsSync(startPath) && fs.lstatSync(startPath).isDirectory()) {
-            this.currentPath = startPath; 
+            this.currentPath = startPath;
         } else {
             this.currentPath = process.env.USERPROFILE;
         }
-        this.undoContainer = new BaseContainer();
-        this.redoContainer = new BaseContainer();
+        this.undoContainer = new BaseContainer(stackLimit);
+        this.redoContainer = new BaseContainer(stackLimit);
         this.drivesHelper = new DrivesHelper();
     }
 
@@ -32,15 +35,15 @@ export class Walker {
     }
 
     checkDirectory(directory) {
-        return this.rootPath === directory 
+        return this.rootPath === directory
             || (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory());
     }
 
     stepInto(directory) {
         const currentPathBefore = this.normalizePath(this.currentPath);
         const gotoDirectory = this.normalizePath(
-            this.currentPath 
-            + (this.rootPath === currentPathBefore ? '' : path.sep) 
+            this.currentPath
+            + (this.rootPath === currentPathBefore ? '' : path.sep)
             + directory
         );
         if (this.checkDirectory(gotoDirectory)) {
@@ -58,7 +61,7 @@ export class Walker {
     stepBackwards() {
         const currentPathBefore = this.normalizePath(this.currentPath);
         const gotoDirectory = this.drivesHelper.getDriveList().includes(currentPathBefore)
-            ? this.rootPath 
+            ? this.rootPath
             : this.normalizePath(this.currentPath + path.sep + '..');
 
         if (this.checkDirectory(gotoDirectory)) {
